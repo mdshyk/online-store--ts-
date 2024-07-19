@@ -1,0 +1,15 @@
+{
+  "verbose": false,
+  "watch": [
+    "./src/**",
+    "./config/**"
+  ],
+  "ignore": [
+    "src/**/*.spec.ts",
+    "*.log"
+  ],
+  "ext": "ts",
+  "execMap": {
+    "ts": "node --es-module-specifier-resolution=node --inspect=0.0.0.0:9229 --nolazy --loader ts-node/esm "
+  }
+}

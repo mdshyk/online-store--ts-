@@ -1,5 +1,5 @@
 import express, {Application, NextFunction} from 'express';
-import { getAllProducts, getProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../controllers/productController';
+import { getAllProducts, getProducts, getProduct, createProduct, updateProduct, deleteProduct, searchProduct, filterProduct } from '../controllers/productController';
 import { addToCart, purchaseProduct } from '../controllers/purchaseController';
 import { protect, restrictFor } from '../controllers/authController';
 
@@ -7,6 +7,14 @@ const router = express.Router();
 
 router.get('/all', (req, res, next) => {
     getAllProducts(req, res, next);
+});
+
+router.get('/search', (req, res, next) => {
+    searchProduct(req, res, next);
+});
+
+router.get('/filter', (req, res, next) => {
+    filterProduct(req, res, next);
 });
 
 router

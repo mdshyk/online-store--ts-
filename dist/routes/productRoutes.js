@@ -11,6 +11,12 @@ const router = express_1.default.Router();
 router.get('/all', (req, res, next) => {
     (0, productController_1.getAllProducts)(req, res, next);
 });
+router.get('/search', (req, res, next) => {
+    (0, productController_1.searchProduct)(req, res, next);
+});
+router.get('/filter', (req, res, next) => {
+    (0, productController_1.filterProduct)(req, res, next);
+});
 router
     .route('/')
     .get(authController_1.protect, (req, res, next) => {

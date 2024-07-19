@@ -52,12 +52,16 @@ export const getProducts = catchAsync(async (req: AuthenticatedRequest, res: Res
 export const getProduct = catchAsync(async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
         const product = await Product.findById(req.params.id);
         if (!product) {
-            return next(
-                new AppError('Product does not exist', 404)
-            );
+            return res.status(404).json({
+                status: 'fail',
+                message: 'Product does not exist'
+            });
         }
         if (product.user !== req.user._id.toString()) {
-            return next(new AppError('You are restricted', 401));
+            return res.status(401).json({
+                status: 'fail',
+                message: 'You are restricted'
+            });
         }
         res.status(200).json({
             status: 'success',
@@ -84,9 +88,10 @@ export const updateProduct = catchAsync(async (req: AuthenticatedRequest, res: R
     const product = await Product.findOne({ _id: req.params.id, user: req.user._id });
 
     if (!product) {
-        return next(
-            new AppError('You are restricted or the product does not exist', 401)
-        );
+        return res.status(401).json({
+            status: 'fail',
+            message: 'You are restricted or the product does not exist'
+        });
     }
 
     Object.assign(product, req.body);
@@ -105,9 +110,10 @@ export const deleteProduct = catchAsync(async (req: AuthenticatedRequest, res: R
     const product = await Product.findOneAndDelete({ _id: req.params.id, user: req.user._id });
 
     if (!product) {
-        return next(
-            new AppError('You are restricted or the product does not exist', 401)
-        );
+        return res.status(401).json({
+            status: 'fail',
+            message: 'You are restricted or the product does not exist'
+        });
     }
 
     // Send the response
@@ -115,5 +121,59 @@ export const deleteProduct = catchAsync(async (req: AuthenticatedRequest, res: R
         status: 'success',
         message: 'Product successfully deleted',
         data: {}
+    });
+});
+
+export const searchProduct = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const productName: string = req.body.name;
+    
+    const regex: RegExp = new RegExp(productName, "i");
+
+    const products: typeof Product [] = await Product.find({ name: { $regex: regex } });
+
+
+    if (products.length > 0) {
+        return res.status(200).json({
+            status: 'success',
+            results: products.length,
+            data: {
+                products
+            }
+        });
+    }
+
+    return res.status(404).json({
+        status: 'fail',
+        message: 'No products found.'
+    });
+});
+
+export const filterProduct = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    const products: ProductObj [] = await Product.find({
+        price: { $gte: req.body.minPrice, $lte: req.body.maxPrice }
+    });
+
+    if (req.body.maxPrice < req.body.minPrice) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Max price must be greater than min price'
+        }); 
+    }
+
+
+    if (products.length > 0) {
+        return res.status(200).json({
+            status: 'success',
+            results: products.length,
+            data: {
+                products
+            }
+        });
+    }
+
+    return res.status(404).json({
+        status: 'fail',
+        message: 'No products found in the specified price range.'
     });
 });
